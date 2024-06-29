@@ -5,11 +5,12 @@
     "moduleResolution": "Node",
     "baseUrl": "./",
     "paths": {
-      "@src/*": ["src/*"],
       "@common/*": ["src/common/*"],
       "@lib/*": ["src/lib/*"],
       "@model/*": ["src/model/*"],
-      "@module/*": ["src/module/*"]
+      "@module/*": ["src/module/*"],
+      "@types/*": ["src/types/*"],
+      "@src/*": ["src/*"]
     },
     "typeRoots": ["node_modules/@types", "src/types"],
     "types": ["node", "jest"],
