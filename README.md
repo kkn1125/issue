@@ -4,6 +4,11 @@
 
 ## 업데이트 이력
 
+- 0.0.3
+  - 이슈 기본 기능 설계 및 디자인
+  - 이슈 try, catch, finally 제작
+  - 이슈 async solve 제작
+  - 이슈 throw optional 처리
 - 0.0.2
   - feat
     - 테스트 환경 설정

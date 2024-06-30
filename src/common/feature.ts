@@ -12,3 +12,10 @@ export function hasObjectIn<K extends string>(
 ): object is ObjectHasKey<K> {
   return key in object;
 }
+
+export const isAsyncFunction = (func: Function | Promise<any>) => {
+  const isAsyncFunc =
+    func instanceof Function && func.toString().startsWith("async");
+  const isPromise = func instanceof Promise;
+  return isAsyncFunc || isPromise;
+};

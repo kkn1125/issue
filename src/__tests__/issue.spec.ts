@@ -1,5 +1,6 @@
 import { Issue } from "@model/issue";
 import { describe, expect, it } from "vitest";
+import pkg from "../../package.json";
 
 describe("Test", () => {
   it("Test", () => {
@@ -14,9 +15,9 @@ describe("Issue Class Test", () => {
     expect("version" in Issue).toBeTruthy();
   });
 
-  it("static version is 1.0.0", () => {
-    console.log("[Issue Class Test]: static version is 1.0.0");
-    const currentVersion = "0.0.1";
+  it(`static version is ${pkg.version}`, () => {
+    console.log(`[Issue Class Test]: static version is ${pkg.version}`);
+    const currentVersion = pkg.version;
     expect(Issue.version).toStrictEqual(currentVersion);
   });
 });
@@ -79,23 +80,44 @@ describe("Issue design Test", () => {
       issue = Issue.task("solv calc Sum");
       issue.use(numA, numB);
       issue.pipe(calcSum);
-      expect(Issue.solve(issue)).toStrictEqual(numA + numB);
+      expect(Issue.solve(issue).result).toStrictEqual(numA + numB);
 
       issue = Issue.task("solv calc Div");
       issue.use(numA, numB);
       issue.pipe(calcDiv);
-      expect(Issue.solve(issue)).toStrictEqual(numA / numB);
+      expect(Issue.solve(issue).result).toStrictEqual(numA / numB);
 
       issue = Issue.task("solv calc Div");
       issue.use(numA, numB);
       issue.pipe(calcDiv);
       issue.pipe(calcTest);
       issue.pipe(calcTest2);
-      expect(Issue.solve(issue)).toStrictEqual(numA / numB - 5 + 16);
-      console.log("is matched", numA / numB - 5 + 16);
+      const result = numA / numB - 5 + 16;
+      expect(Issue.solve(issue).result).toStrictEqual(result);
+      console.log("is matched", result);
 
       // expect(calcSum(numA, numB)).toStrictEqual(numA + numB);
       // expect(calcDiv(numA, numB)).toStrictEqual(numA / numB);
+    });
+
+    it("test try", () => {
+      const numA = Math.floor(Math.random() * 10);
+      const numB = Math.floor(Math.random() * 10);
+
+      function calcSum(a: number, b: number) {
+        return a + b;
+      }
+
+      issue = Issue.task("solv calc Sum");
+      issue.throw = true;
+      issue.use(numA, numB);
+      issue.pipe(calcSum);
+      issue.try((...arg) => {
+        console.log("test", arg);
+        throw new Error("Test Error");
+      });
+      const result = () => Issue.solve(issue).error;
+      expect(result).toThrow(new Error("Test Error"));
     });
   });
 });
