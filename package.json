@@ -1,7 +1,7 @@
 {
   "name": "issue",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.2",
+  "description": "issue task test",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --watch ./src/ -e \".ts\" -x ts-node src/index.ts",
