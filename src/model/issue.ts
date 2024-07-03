@@ -1,5 +1,6 @@
 import { isNil } from "@common/feature";
 import { VERSION } from "@src/common/variable";
+import { Logger } from "./logger";
 
 type Predicate<R = any> = (...args: any) => R;
 
@@ -63,9 +64,8 @@ export class Issue {
       error: errors,
     };
   }
+
   static solveAsync(issue: Issue) {
-    console.log("solving:", issue.#build);
-    console.log("solving name:", issue.name);
     let result: any = null;
     let errors: Error | null = null;
 
@@ -73,35 +73,38 @@ export class Issue {
       for (const task of issue.#build) {
         let useArgs = null;
 
-        if (Array.isArray(issue.#useArgs) && issue.#useArgs.length > 0) {
-          useArgs = [...issue.#useArgs];
-          issue.#useArgs = [];
-        }
+        if (!Array.isArray(issue.#useArgs)) continue;
+        if (issue.#useArgs.length <= 0) continue;
 
-        if (!isNil(useArgs)) {
-          if (task instanceof TryIssue) {
-            // try
-            try {
-              result = task.do(...useArgs);
-            } catch (error: any) {
-              issue.#catch(error);
-              if (issue.throw) {
-                reject(error);
-                break;
-              }
-              errors = error;
+        useArgs = [...issue.#useArgs];
+        issue.#useArgs = [];
+
+        // if (isNil(useArgs)) continue;
+
+        if (task instanceof TryIssue) {
+          try {
+            result = task.do(...useArgs);
+          } catch (error: any) {
+            issue.#catch(error);
+            if (issue.throw) {
+              reject(error);
+              break;
             }
-          } else if (task instanceof Function) {
-            result = await task(...useArgs);
+            errors = error;
+          }
+          continue;
+        }
+        if (task instanceof Function) {
+          result = await task(...useArgs);
 
-            if (result) {
-              if (Array.isArray(result)) {
-                issue.#useArgs.push(...result);
-              } else {
-                issue.#useArgs.push(result);
-              }
+          if (result) {
+            if (Array.isArray(result)) {
+              issue.#useArgs.push(...result);
+            } else {
+              issue.#useArgs.push(result);
             }
           }
+          continue;
         }
       }
 
@@ -124,9 +127,13 @@ export class Issue {
     finally: false,
   };
 
+  logger: Logger;
+
   constructor();
   constructor(name: string);
   constructor(name?: string) {
+    console.log(this)
+    this.logger = new Logger(this);
     if (name) {
       this.name = name;
     }
@@ -149,7 +156,7 @@ export class Issue {
     this.#trycatch.try = true;
   }
 
-  set catch(predicate: Predicate) {
+  catch(predicate: Predicate) {
     Object.assign(this, { "#catch": predicate });
     this.#trycatch.try = true;
   }

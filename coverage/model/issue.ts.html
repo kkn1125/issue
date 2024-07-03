@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">68.2% </span>
+                <span class="strong">68.88% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>118/173</span>
+                <span class='fraction'>124/180</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">68.2% </span>
+                <span class="strong">68.88% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>118/173</span>
+                <span class='fraction'>124/180</span>
             </div>
         
             
@@ -236,7 +236,15 @@
 <a name='L171'></a><a href='#L171'>171</a>
 <a name='L172'></a><a href='#L172'>172</a>
 <a name='L173'></a><a href='#L173'>173</a>
-<a name='L174'></a><a href='#L174'>174</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -302,6 +310,7 @@
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -350,6 +359,11 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">7x</span>
@@ -411,6 +425,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { isNil } from "@common/feature";
 import { VERSION } from "@src/common/variable";
+import { Logger } from "./logger";
 &nbsp;
 type Predicate&lt;R = any&gt; = (...args: any) =&gt; R;
 &nbsp;
@@ -474,9 +489,8 @@ export class Issue {
       error: errors,
     };
   }
+&nbsp;
   static <span class="fstat-no" title="function not covered" >solveAsync(issue: Issue) {</span>
-<span class="cstat-no" title="statement not covered" >    console.log("solving:", issue.#build);</span>
-<span class="cstat-no" title="statement not covered" >    console.log("solving name:", issue.name);</span>
 <span class="cstat-no" title="statement not covered" >    let result: any = null;</span>
 <span class="cstat-no" title="statement not covered" >    let errors: Error | null = null;</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -484,35 +498,38 @@ export class Issue {
 <span class="cstat-no" title="statement not covered" >      for (const task of issue.#build) {</span>
 <span class="cstat-no" title="statement not covered" >        let useArgs = null;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        if (Array.isArray(issue.#useArgs) &amp;&amp; issue.#useArgs.length &gt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >          useArgs = [...issue.#useArgs];</span>
-<span class="cstat-no" title="statement not covered" >          issue.#useArgs = [];</span>
-<span class="cstat-no" title="statement not covered" >        }</span>
+<span class="cstat-no" title="statement not covered" >        if (!Array.isArray(issue.#useArgs)) continue;</span>
+<span class="cstat-no" title="statement not covered" >        if (issue.#useArgs.length &lt;= 0) continue;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        if (!isNil(useArgs)) {</span>
-<span class="cstat-no" title="statement not covered" >          if (task instanceof TryIssue) {</span>
-<span class="cstat-no" title="statement not covered" >            // try</span>
-<span class="cstat-no" title="statement not covered" >            try {</span>
-<span class="cstat-no" title="statement not covered" >              result = task.do(...useArgs);</span>
-<span class="cstat-no" title="statement not covered" >            } catch (error: any) {</span>
-<span class="cstat-no" title="statement not covered" >              issue.#catch(error);</span>
-<span class="cstat-no" title="statement not covered" >              if (issue.throw) {</span>
-<span class="cstat-no" title="statement not covered" >                reject(error);</span>
-<span class="cstat-no" title="statement not covered" >                break;</span>
-<span class="cstat-no" title="statement not covered" >              }</span>
-<span class="cstat-no" title="statement not covered" >              errors = error;</span>
+<span class="cstat-no" title="statement not covered" >        useArgs = [...issue.#useArgs];</span>
+<span class="cstat-no" title="statement not covered" >        issue.#useArgs = [];</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        // if (isNil(useArgs)) continue;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        if (task instanceof TryIssue) {</span>
+<span class="cstat-no" title="statement not covered" >          try {</span>
+<span class="cstat-no" title="statement not covered" >            result = task.do(...useArgs);</span>
+<span class="cstat-no" title="statement not covered" >          } catch (error: any) {</span>
+<span class="cstat-no" title="statement not covered" >            issue.#catch(error);</span>
+<span class="cstat-no" title="statement not covered" >            if (issue.throw) {</span>
+<span class="cstat-no" title="statement not covered" >              reject(error);</span>
+<span class="cstat-no" title="statement not covered" >              break;</span>
 <span class="cstat-no" title="statement not covered" >            }</span>
-<span class="cstat-no" title="statement not covered" >          } else if (task instanceof Function) {</span>
-<span class="cstat-no" title="statement not covered" >            result = await task(...useArgs);</span>
+<span class="cstat-no" title="statement not covered" >            errors = error;</span>
+<span class="cstat-no" title="statement not covered" >          }</span>
+<span class="cstat-no" title="statement not covered" >          continue;</span>
+<span class="cstat-no" title="statement not covered" >        }</span>
+<span class="cstat-no" title="statement not covered" >        if (task instanceof Function) {</span>
+<span class="cstat-no" title="statement not covered" >          result = await task(...useArgs);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >            if (result) {</span>
-<span class="cstat-no" title="statement not covered" >              if (Array.isArray(result)) {</span>
-<span class="cstat-no" title="statement not covered" >                issue.#useArgs.push(...result);</span>
-<span class="cstat-no" title="statement not covered" >              } else {</span>
-<span class="cstat-no" title="statement not covered" >                issue.#useArgs.push(result);</span>
-<span class="cstat-no" title="statement not covered" >              }</span>
+<span class="cstat-no" title="statement not covered" >          if (result) {</span>
+<span class="cstat-no" title="statement not covered" >            if (Array.isArray(result)) {</span>
+<span class="cstat-no" title="statement not covered" >              issue.#useArgs.push(...result);</span>
+<span class="cstat-no" title="statement not covered" >            } else {</span>
+<span class="cstat-no" title="statement not covered" >              issue.#useArgs.push(result);</span>
 <span class="cstat-no" title="statement not covered" >            }</span>
 <span class="cstat-no" title="statement not covered" >          }</span>
+<span class="cstat-no" title="statement not covered" >          continue;</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" >      }</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -535,9 +552,13 @@ export class Issue {
     finally: false,
   };
 &nbsp;
+  logger: Logger;
+&nbsp;
   constructor();
   constructor(name: string);
   constructor(name?: string) {
+    console.log(this)
+    this.logger = new Logger(this);
     if (name) {
       this.name = name;
     }
@@ -560,7 +581,7 @@ export class Issue {
     this.#trycatch.try = true;
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  set catch(predicate: Predicate) {</span>
+<span class="fstat-no" title="function not covered" >  catch(predicate: Predicate) {</span>
 <span class="cstat-no" title="statement not covered" >    Object.assign(this, { "#catch": predicate });</span>
 <span class="cstat-no" title="statement not covered" >    this.#trycatch.try = true;</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
@@ -589,7 +610,7 @@ export class TryIssue extends Issue {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-06-30T17:17:15.943Z
+                at 2024-07-03T16:40:26.894Z
             </div>
         <script src="../prettify.js"></script>
         <script>

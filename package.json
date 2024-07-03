@@ -1,11 +1,11 @@
 {
   "name": "issue",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "issue task test",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --watch ./src/ -e \".ts\" -x ts-node -r tsconfig-paths/register src/index.ts",
-    "test": "vitest",
+    "test": "vitest --watch",
     "report": "vite preview --outDir=html"
   },
   "devDependencies": {

@@ -1,7 +1,10 @@
 import { Issue } from "@model/issue";
 import { VERSION } from "./common/variable";
+import { Logger } from "@model/logger";
 
-console.log(VERSION);
+const logger = new Logger("index");
+
+logger.log(VERSION);
 
 const issue = new Issue("Test Issue");
 issue.throw = false;
@@ -15,36 +18,39 @@ issue.try((a) => {
   }
   return a;
 });
-issue.catch = function customCatch(error: any) {
-  console.log("custom catch", error.message);
-};
-issue.finally(() => {
-  console.log("work");
+
+issue.catch(function customCatch(error: any) {
+  logger.log("custom catch", error.message);
 });
+
+issue.finally(() => {
+  logger.log("work");
+});
+
 const result = Issue.solve(issue);
 if (result.error) {
-  console.log("error 발생");
+  logger.log("error 발생");
 }
 
-console.log(result.result);
+logger.log(result.result);
 
 async function test() {}
 const prom = new Promise(() => {});
 const test2 = async () => {};
 
-console.log(test);
-console.log(test2);
+logger.log(test);
+logger.log(test2);
 
-console.log(typeof test);
-console.log(typeof test2);
-console.log(typeof prom);
-console.log(test2 instanceof Function);
-console.log(test instanceof Function);
-console.log(prom instanceof Promise);
+logger.log(typeof test);
+logger.log(typeof test2);
+logger.log(typeof prom);
+logger.log(test2 instanceof Function);
+logger.log(test instanceof Function);
+logger.log(prom instanceof Promise);
 
-console.log(test2.toString().startsWith("async"));
-console.log(test.toString().startsWith("async"));
-console.log(prom.toString());
+logger.log(test2.toString().startsWith("async"));
+logger.log(test.toString().startsWith("async"));
+logger.log(prom.toString());
 
 async function testAsync() {
   return new Promise((resolve) => {
