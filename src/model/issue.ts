@@ -10,6 +10,14 @@ export class Issue {
     return VERSION;
   }
 
+  static safeDiv(a: number, b: number) {
+    const div = a / b;
+    const isInfinity = !Number.isFinite(div);
+    const isNaN = Number.isNaN(div);
+    console.log(isInfinity, isNaN, div);
+    return isInfinity || isNaN ? 0 : div;
+  }
+
   /* 이슈 생성 */
   static task(name: string) {
     const issue = new Issue(name);
@@ -25,12 +33,13 @@ export class Issue {
 
     for (const task of issue.#build) {
       let useArgs = null;
+      // console.log(issue.#useArgs, task);
 
-      if (Array.isArray(issue.#useArgs) && issue.#useArgs.length > 0) {
-        useArgs = [...issue.#useArgs];
-        issue.#useArgs = [];
-      }
+      if (!Array.isArray(issue.#useArgs)) continue;
+      // if (issue.#useArgs.length <= 0) continue;
 
+      useArgs = [...issue.#useArgs];
+      issue.#useArgs = [];
       if (!isNil(useArgs)) {
         if (task instanceof TryIssue) {
           // try
@@ -48,7 +57,7 @@ export class Issue {
         } else if (task instanceof Function) {
           result = task(...useArgs);
 
-          if (result) {
+          if (!isNil(result)) {
             if (Array.isArray(result)) {
               issue.#useArgs.push(...result);
             } else {
@@ -74,7 +83,7 @@ export class Issue {
         let useArgs = null;
 
         if (!Array.isArray(issue.#useArgs)) continue;
-        if (issue.#useArgs.length <= 0) continue;
+        // if (issue.#useArgs.length <= 0) continue;
 
         useArgs = [...issue.#useArgs];
         issue.#useArgs = [];
@@ -96,8 +105,7 @@ export class Issue {
         }
         if (task instanceof Function) {
           result = await task(...useArgs);
-
-          if (result) {
+          if (!isNil(result)) {
             if (Array.isArray(result)) {
               issue.#useArgs.push(...result);
             } else {
@@ -132,7 +140,7 @@ export class Issue {
   constructor();
   constructor(name: string);
   constructor(name?: string) {
-    console.log(this)
+    console.log(this);
     this.logger = new Logger(this);
     if (name) {
       this.name = name;
