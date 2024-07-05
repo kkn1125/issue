@@ -1,6 +1,8 @@
 import { isNil } from "@common/feature";
 import { VERSION } from "@src/common/variable";
 import { Logger } from "./logger";
+import { Util } from "./issue.util";
+import { TaskTrace } from "./task.trace";
 
 type Predicate<R = any> = (...args: any) => R;
 
@@ -10,13 +12,11 @@ export class Issue {
     return VERSION;
   }
 
-  static safeDiv(a: number, b: number) {
-    const div = a / b;
-    const isInfinity = !Number.isFinite(div);
-    const isNaN = Number.isNaN(div);
-    console.log(isInfinity, isNaN, div);
-    return isInfinity || isNaN ? 0 : div;
+  static get logger() {
+    return new Logger();
   }
+
+  static util = new Util();
 
   /* 이슈 생성 */
   static task(name: string) {
@@ -26,11 +26,16 @@ export class Issue {
 
   /* 이슈 해결 메서드 */
   static solve(issue: Issue) {
-    console.log("solving:", issue.#build);
-    console.log("solving name:", issue.name);
+    const start = Date.now();
+    // console.log("solving:", issue.#build);
+    // console.log("solving name:", issue.name);
     let result: any = null;
     let errors: Error | null = null;
 
+    issue.taskTrace.write({
+      protocol: "SOLVING",
+      detail: "solve issues",
+    });
     for (const task of issue.#build) {
       let useArgs = null;
       // console.log(issue.#useArgs, task);
@@ -68,6 +73,18 @@ export class Issue {
       }
     }
     if (errors) result = null;
+
+    const end = Date.now();
+
+    issue.taskTrace.write({
+      protocol: "TIMESTAMP",
+      detail: {
+        start,
+        end,
+        gap: end - start,
+      },
+    });
+
     return {
       result,
       error: errors,
@@ -124,6 +141,10 @@ export class Issue {
     });
   }
 
+  get size() {
+    return this.#build.length;
+  }
+
   /* 이슈 멤버 프로퍼티 */
   throw: boolean = false;
   name!: string;
@@ -136,12 +157,13 @@ export class Issue {
   };
 
   logger: Logger;
+  taskTrace: TaskTrace;
 
   constructor();
   constructor(name: string);
   constructor(name?: string) {
-    console.log(this);
     this.logger = new Logger(this);
+    this.taskTrace = new TaskTrace();
     if (name) {
       this.name = name;
     }
@@ -151,11 +173,19 @@ export class Issue {
   use<T>(...args: T[]) {
     // copy array
     this.#useArgs = [...args];
+    this.taskTrace.write({
+      protocol: "USING",
+      detail: args.length === 0 ? "not use arguments" : "use arguments",
+    });
   }
 
   /* 빌드 처리 */
   pipe<T extends Predicate<R>, R = ReturnType<T>>(predicate: T): void {
     this.#build.push(predicate);
+    this.taskTrace.write({
+      protocol: "PASS",
+      detail: "pipe insert",
+    });
   }
 
   try(predicate: Predicate) {
@@ -170,7 +200,11 @@ export class Issue {
   }
 
   #catch(error?: any) {
-    console.log("catch error:", error.message);
+    this.logger.log("catch error:", error.message);
+    this.taskTrace.write({
+      protocol: "ERROR",
+      detail: "pipe work fail:" + error,
+    });
   }
 
   finally(predicate: Predicate) {

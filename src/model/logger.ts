@@ -1,41 +1,14 @@
-// interface BaseLogger {
-//   log(message?: unknown, ...optionalParams: unknown[]): void;
-//   info(message?: unknown, ...optionalParams: unknown[]): void;
-//   debug(message?: unknown, ...optionalParams: unknown[]): void;
-//   warn(message?: unknown, ...optionalParams: unknown[]): void;
-//   error(message?: unknown, ...optionalParams: unknown[]): void;
-// }
-
+import { LogLevel } from "@common/enum";
 import { format } from "@lib/format";
 
-export const LogLevel = {
-  Log: {
-    Label: "LOG",
-    Sign: "🪵",
-  },
-  Info: {
-    Label: "INFO",
-    Sign: "✨",
-  },
-  Debug: {
-    Label: "DEBUG",
-    Sign: "🐛",
-  },
-  Warn: {
-    Label: "WARN",
-    Sign: "⚠️",
-  },
-  Error: {
-    Label: "ERROR",
-    Sign: "🔥",
-  },
-} as const;
-export type LogLevel = (typeof LogLevel)[keyof typeof LogLevel];
-
-export class Logger /* implements BaseLogger */ {
+export class Logger {
   context: string;
 
   log!: (message: unknown, ...optionalMessages: unknown[]) => void;
+  info!: (message: unknown, ...optionalMessages: unknown[]) => void;
+  warn!: (message: unknown, ...optionalMessages: unknown[]) => void;
+  error!: (message: unknown, ...optionalMessages: unknown[]) => void;
+  debug!: (message: unknown, ...optionalMessages: unknown[]) => void;
 
   constructor();
   constructor(context: string);
@@ -72,7 +45,11 @@ export class Logger /* implements BaseLogger */ {
         get [level.toLowerCase()]() {
           return console.log.bind(
             self,
-            `${LogLevel.Log.Sign} [${self.timestamp}] [${self.context}]  ${LogLevel.Log.Label} ---`
+            `${LogLevel[level as keyof typeof LogLevel].Sign} [${
+              self.timestamp
+            }] [${self.context}]  ${
+              LogLevel[level as keyof typeof LogLevel].Label
+            } ---`
           );
         },
       });
