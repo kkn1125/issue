@@ -1,11 +1,11 @@
 import { IssueProtocol } from "@common/enum";
 
-type LogLine = {
+export type LogLine = {
   code: IssueProtocol[0];
   message: string;
   detail?: any | any[];
 };
-type WriteProps = {
+export type WriteProps = {
   protocol: keyof typeof IssueProtocol;
   detail?: any | any[];
 };

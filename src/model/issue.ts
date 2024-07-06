@@ -2,18 +2,36 @@ import { isNil } from "@common/feature";
 import { VERSION } from "@src/common/variable";
 import { Logger } from "./logger";
 import { Util } from "./issue.util";
-import { TaskTrace } from "./task.trace";
+import { LogLine, TaskTrace } from "./task.trace";
 
-type Predicate<R = any> = (...args: any) => R;
+export type Predicate<K = any, R = any> = (issue: Issue, args: K) => R;
+export type Solved<T = any> = {
+  name: string;
+  result: T | null;
+  error: Error;
+  trace: LogLine[];
+};
 
 export class Issue {
+  static #mode: Mode = "development";
+
+  static set mode(mode: Mode) {
+    Issue.logger.log("set mode");
+    Issue.#mode = mode;
+  }
+
+  static get mode() {
+    return this.#mode;
+  }
+
   /* 버전 체크 */
   static get version() {
     return VERSION;
   }
 
   static get logger() {
-    return new Logger();
+    const logger = new Logger();
+    return logger;
   }
 
   static util = new Util();
@@ -25,58 +43,87 @@ export class Issue {
   }
 
   /* 이슈 해결 메서드 */
-  static solve(issue: Issue) {
+  static solve<T = any>(issue: Issue): Solved<T> {
+    const copyIssue = issue.deepcopy();
     const start = Date.now();
-    // console.log("solving:", issue.#build);
-    // console.log("solving name:", issue.name);
-    let result: any = null;
-    let errors: Error | null = null;
+    let result: T | null = null;
+    let errors: Error = {
+      message: "",
+      stack: "",
+      cause: "",
+      name: "",
+    };
 
-    issue.taskTrace.write({
+    copyIssue.taskTrace.write({
       protocol: "SOLVING",
       detail: "solve issues",
     });
-    for (const task of issue.#build) {
+
+    for (const task of copyIssue.#build) {
       let useArgs = null;
-      // console.log(issue.#useArgs, task);
 
-      if (!Array.isArray(issue.#useArgs)) continue;
-      // if (issue.#useArgs.length <= 0) continue;
+      if (!Array.isArray(copyIssue.#useArgs)) continue;
 
-      useArgs = [...issue.#useArgs];
-      issue.#useArgs = [];
-      if (!isNil(useArgs)) {
-        if (task instanceof TryIssue) {
-          // try
-          try {
-            // console.log("nil task", task.do);
-            result = task.do(...useArgs);
-          } catch (error: any) {
-            // console.log("error", error);
-            issue.#catch(error);
-            if (issue.throw) {
-              throw error;
-            }
-            errors = error;
+      useArgs = [...copyIssue.#useArgs];
+      copyIssue.#useArgs = [];
+      if (task instanceof Issue) {
+        try {
+          result = task.do(issue, useArgs);
+          copyIssue.taskTrace.write({
+            protocol: "DOING",
+            detail: [result],
+          });
+        } catch (error: any) {
+          copyIssue.#catch(error);
+          if (copyIssue.throw) {
+            throw error;
           }
-        } else if (task instanceof Function) {
-          result = task(...useArgs);
-
-          if (!isNil(result)) {
-            if (Array.isArray(result)) {
-              issue.#useArgs.push(...result);
-            } else {
-              issue.#useArgs.push(result);
-            }
+          errors = error;
+        }
+      } else if (task instanceof TryIssue) {
+        try {
+          result = task.do(issue, useArgs);
+          copyIssue.taskTrace.write({
+            protocol: "DOING",
+            detail: [result],
+          });
+        } catch (error: any) {
+          copyIssue.#catch(error);
+          if (copyIssue.throw) {
+            throw error;
+          }
+          errors = error;
+        }
+      } else if (task instanceof Function) {
+        try {
+          result = task(issue, useArgs);
+        } catch (error: any) {
+          console.log("error123123123", error);
+          copyIssue.#catch(error);
+          if (copyIssue.throw) {
+            throw error;
+          }
+          errors = error;
+        }
+        copyIssue.taskTrace.write({
+          protocol: "DOING",
+          detail: [result],
+        });
+        if (!isNil(result)) {
+          if (Array.isArray(result)) {
+            copyIssue.#useArgs.push(...result);
+          } else {
+            copyIssue.#useArgs.push(result);
           }
         }
       }
     }
-    if (errors) result = null;
+
+    if (errors.stack) result = null;
 
     const end = Date.now();
 
-    issue.taskTrace.write({
+    copyIssue.taskTrace.write({
       protocol: "TIMESTAMP",
       detail: {
         start,
@@ -86,33 +133,57 @@ export class Issue {
     });
 
     return {
+      name: copyIssue.name,
       result,
       error: errors,
+      trace: copyIssue.taskTrace.show(),
     };
   }
 
-  static solveAsync(issue: Issue) {
+  static solveAsync(issue: Issue): Promise<Solved> {
+    const copyIssue = new Issue(issue.name);
+    Object.assign(copyIssue, issue);
     let result: any = null;
-    let errors: Error | null = null;
+    let errors: Error = {
+      message: "",
+      stack: "",
+      cause: "",
+      name: "",
+    };
 
     return new Promise(async (resolve, reject) => {
-      for (const task of issue.#build) {
+      for (const task of copyIssue.#build) {
         let useArgs = null;
 
-        if (!Array.isArray(issue.#useArgs)) continue;
-        // if (issue.#useArgs.length <= 0) continue;
+        if (!Array.isArray(copyIssue.#useArgs)) continue;
 
-        useArgs = [...issue.#useArgs];
-        issue.#useArgs = [];
+        useArgs = [...copyIssue.#useArgs];
+        copyIssue.#useArgs = [];
 
-        // if (isNil(useArgs)) continue;
-
-        if (task instanceof TryIssue) {
+        if (task instanceof Issue) {
           try {
-            result = task.do(...useArgs);
+            result = task.do(issue, useArgs);
+            copyIssue.taskTrace.write({
+              protocol: "DOING",
+              detail: [result],
+            });
           } catch (error: any) {
-            issue.#catch(error);
-            if (issue.throw) {
+            copyIssue.#catch(error);
+            if (copyIssue.throw) {
+              throw error;
+            }
+            errors = error;
+          }
+        } else if (task instanceof TryIssue) {
+          try {
+            result = await task.do(issue, useArgs);
+            copyIssue.taskTrace.write({
+              protocol: "DOING",
+              detail: [result],
+            });
+          } catch (error: any) {
+            copyIssue.#catch(error);
+            if (copyIssue.throw) {
               reject(error);
               break;
             }
@@ -121,24 +192,48 @@ export class Issue {
           continue;
         }
         if (task instanceof Function) {
-          result = await task(...useArgs);
+          try {
+            result = await task(issue, useArgs);
+          } catch (error: any) {
+            copyIssue.#catch(error);
+            if (copyIssue.throw) {
+              reject(error);
+              break;
+            }
+            errors = error;
+          }
+          copyIssue.taskTrace.write({
+            protocol: "DOING",
+            detail: [result],
+          });
           if (!isNil(result)) {
             if (Array.isArray(result)) {
-              issue.#useArgs.push(...result);
+              copyIssue.#useArgs.push(...result);
             } else {
-              issue.#useArgs.push(result);
+              copyIssue.#useArgs.push(result);
             }
           }
           continue;
         }
       }
 
-      if (errors) result = null;
+      if (errors.stack) result = null;
       resolve({
+        name: copyIssue.name,
         result,
         error: errors,
+        trace: copyIssue.taskTrace.show(),
       });
     });
+  }
+
+  deepcopy() {
+    const newIssue = new Issue(this.name);
+    newIssue.use([...this.#useArgs]);
+    newIssue.catch(this.copyCatch());
+    newIssue.#trycatch = { ...this.#trycatch };
+    newIssue.#build = [...this.#build];
+    return newIssue;
   }
 
   get size() {
@@ -170,9 +265,10 @@ export class Issue {
   }
 
   /* 사용 인자 등록 */
-  use<T>(...args: T[]) {
+  use<T extends [...any]>(args: T) {
+    const argument = args instanceof Array ? args : [args];
     // copy array
-    this.#useArgs = [...args];
+    this.#useArgs = [...argument];
     this.taskTrace.write({
       protocol: "USING",
       detail: args.length === 0 ? "not use arguments" : "use arguments",
@@ -180,8 +276,9 @@ export class Issue {
   }
 
   /* 빌드 처리 */
-  pipe<T extends Predicate<R>, R = ReturnType<T>>(predicate: T): void {
+  pipe<K extends any, R extends any>(predicate: Predicate<K, R>): void {
     this.#build.push(predicate);
+    if (Issue.util.hasIn(predicate, "parent")) predicate.parent = this;
     this.taskTrace.write({
       protocol: "PASS",
       detail: "pipe insert",
@@ -194,21 +291,26 @@ export class Issue {
     this.#trycatch.try = true;
   }
 
+  protected copyCatch() {
+    return this.#catch;
+  }
+
   catch(predicate: Predicate) {
     Object.assign(this, { "#catch": predicate });
-    this.#trycatch.try = true;
+    this.#trycatch.catch = true;
   }
 
   #catch(error?: any) {
     this.logger.log("catch error:", error.message);
     this.taskTrace.write({
       protocol: "ERROR",
-      detail: "pipe work fail:" + error,
+      detail: "pipe work fail: " + error,
     });
   }
 
   finally(predicate: Predicate) {
     this.#build.push(predicate);
+    this.#trycatch.finally = true;
   }
 }
 

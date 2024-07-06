@@ -36,6 +36,7 @@ export const IssueProtocol = {
   SOLVING: [103, "solving"],
   ASYNC_SOLVING: [104, "async solving"],
   TIMESTAMP: [105, "timestamp"],
+  DOING: [106, "doing"],
 
   CREATED: [200, "created"],
   UPDATED: [201, "updated"],

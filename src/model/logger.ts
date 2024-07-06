@@ -1,7 +1,10 @@
 import { LogLevel } from "@common/enum";
 import { format } from "@lib/format";
+import { Issue } from "./issue";
 
 export class Logger {
+  #mode: Mode = Issue.mode;
+
   context: string;
 
   log!: (message: unknown, ...optionalMessages: unknown[]) => void;
@@ -43,14 +46,17 @@ export class Logger {
       const self = this;
       Object.assign(this, {
         get [level.toLowerCase()]() {
-          return console.log.bind(
-            self,
-            `${LogLevel[level as keyof typeof LogLevel].Sign} [${
-              self.timestamp
-            }] [${self.context}]  ${
-              LogLevel[level as keyof typeof LogLevel].Label
-            } ---`
-          );
+          if (self.#mode === "development") {
+            return console.log.bind(
+              self,
+              `${LogLevel[level as keyof typeof LogLevel].Sign} [${
+                self.timestamp
+              }] [${self.context}]  ${
+                LogLevel[level as keyof typeof LogLevel].Label
+              } ---`
+            );
+          }
+          return () => {};
         },
       });
     }
