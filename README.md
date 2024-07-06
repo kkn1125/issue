@@ -35,3 +35,8 @@
 - 0.0.1
   - init
     - 초기화 커밋
+    - 
+<!-- %comspec% /k "C:\Program Files\RabbitMQ Server\rabbitmq_server-3.10.6\sbin\rabbitmq-service.bat" start & if not errorlevel 1 exit /b 0
+
+
+C:\Windows\System32\cmd.exe /k cd /d C:\Program Files\RabbitMQ Server\rabbitmq_server-3.10.6\sbin && rabbitmq-service.bat start & if not errorlevel 1 exit /b 0 -->

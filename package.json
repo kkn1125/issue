@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon --watch ./src/ -e \".ts\" -x ts-node -r tsconfig-paths/register src/index.ts",
     "test": "vitest --watch",
-    "report": "vite preview --outDir=html"
+    "report": "vite preview --outDir=html",
+    "build": "tsc && tsc-alias"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
@@ -19,6 +20,7 @@
     "nodemon": "^3.1.4",
     "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
     "tslib": "^2.6.3",
     "typescript": "^5.5.2",
