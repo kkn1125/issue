@@ -81,7 +81,6 @@ export class Issue {
                     result = task(issue, useArgs);
                 }
                 catch (error) {
-                    console.log("error123123123", error);
                     copyIssue.#catch(error);
                     if (copyIssue.throw) {
                         throw error;

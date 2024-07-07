@@ -98,7 +98,6 @@ export class Issue {
         try {
           result = task(issue, useArgs);
         } catch (error: any) {
-          console.log("error123123123", error);
           copyIssue.#catch(error);
           if (copyIssue.throw) {
             throw error;

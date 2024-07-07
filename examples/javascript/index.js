@@ -2,6 +2,15 @@
 
 import Issue from "../../dist/src/index";
 
+[...document.forms[0].querySelectorAll("input")].forEach((input) => {
+  input.addEventListener("invalid", (e) => {
+    const target = e.target;
+    if (target instanceof HTMLInputElement) {
+      document.forms[0].classList.add("was-validated");
+    }
+  });
+});
+
 function handleSubmit(e) {
   e.preventDefault();
 
@@ -16,26 +25,48 @@ function handleSubmit(e) {
   /** @type {string} */
   const hobby = frm.hobby.value;
 
-  const nameValidateIssue = Issue.task("validate username value");
-  nameValidateIssue.use([name]);
-  nameValidateIssue.pipe((issue, [name]) => /[0-9]+/g.test(name));
-
-  const pwdValidateIssue = Issue.task("validate password value");
-  pwdValidateIssue.use([pwd]);
-  pwdValidateIssue.pipe((issue, [pwd]) => {
-    const result =
-      /((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])\b[a-z]{3,4}[0-9]{3,4}[A-Za-z0-9]{5,6}$)/g.test(
-        pwd
-      );
-    console.log(result);
-    return result;
+  const validateIssue = Issue.task("validate username value");
+  validateIssue.use([name, pwd, birth]);
+  validateIssue.pipe((issue, [name, ...other]) => {
+    Issue.logger.debug("1");
+    if (/[0-9]+/g.test(name)) {
+      return other;
+    }
+    throw new Error("invalide name");
   });
 
-  const solved = Issue.solve(pwdValidateIssue);
-  console.log("solved", solved);
+  // const pwdValidateIssue = Issue.task("validate password value");
+  // pwdValidateIssue.use([pwd]);
+  validateIssue.pipe((issue, [pwd, ...other]) => {
+    // 소문자3~4
+    Issue.logger.debug("2");
+    if (
+      /((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])\b[a-z]{3,4}[A-Z]{3,4}[0-9]{3,4}[!@#$%^&*()_\-=+]{1,2}$)/g.test(
+        pwd
+      )
+    ) {
+      return other;
+    }
+    frm.pwd.invalid = true;
+    throw new Error("invalide password");
+  });
 
-  // const issue = Issue.task("handle submit");
-  // issue.pipe();
+  // const birthValidateIssue = Issue.task("validate password value");
+  // birthValidateIssue.use([birth]);
+  validateIssue.pipe((issue, [birth]) => {
+    Issue.logger.debug("3");
+    const result = new Date(birth);
+    const isInvalidDate = result.toString().includes("Invalid Date");
+    return !isInvalidDate;
+  });
+
+  // const nameSolved = Issue.solve(nameValidateIssue);
+  // const pwdSolved = Issue.solve(pwdValidateIssue);
+  // const birthSolved = Issue.solve(birthValidateIssue);
+  const solved = Issue.solve(validateIssue);
+
+  Issue.logger.log("solved", solved);
+  Issue.logger.log("solved", solved.result);
 
   return false;
 }
