@@ -7,9 +7,11 @@
     "dev": "nodemon --watch ./src/ -e \".ts\" -x ts-node -r tsconfig-paths/register src/index.ts",
     "test": "vitest --watch",
     "report": "vite preview --outDir=html",
-    "build": "tsc && tsc-alias"
+    "build": "tsc && tsc-alias",
+    "exam": "bash exam"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.12",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.9",
     "@vitest/coverage-v8": "^1.6.0",
@@ -25,12 +27,13 @@
     "tslib": "^2.6.3",
     "typescript": "^5.5.2",
     "vite": "^5.3.2",
+    "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.6.0"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "vite-tsconfig-paths": "^4.3.2"
+    "debug": "^4.3.5"
   }
 }

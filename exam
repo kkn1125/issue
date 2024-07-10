@@ -1,0 +1,3 @@
+#! /usr/env/bin bash
+
+cd examples/javascript$1 && cross-env DEBUG=$2 vite

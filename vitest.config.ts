@@ -15,12 +15,30 @@ export default defineConfig({
   },
   resolve: {
     alias: [
-      { find: "@common/", replacement: "src/common/" },
-      { find: "@lib/", replacement: "src/lib/" },
-      { find: "@model/", replacement: "src/model/" },
-      { find: "@module/", replacement: "src/module/" },
-      { find: "@types/", replacement: "src/types/" },
-      { find: "@src/", replacement: "src/" },
+      {
+        find: "@common/",
+        replacement: new URL("./src/common/", import.meta.url).pathname,
+      },
+      {
+        find: "@lib/",
+        replacement: new URL("./src/lib/", import.meta.url).pathname,
+      },
+      {
+        find: "@model/",
+        replacement: new URL("./src/model/", import.meta.url).pathname,
+      },
+      {
+        find: "@module/",
+        replacement: new URL("./src/module/", import.meta.url).pathname,
+      },
+      {
+        find: "@types/",
+        replacement: new URL("./src/types/", import.meta.url).pathname,
+      },
+      {
+        find: "@src/",
+        replacement: new URL("./src/", import.meta.url).pathname,
+      },
     ],
   },
   plugins: [tsconfigPaths()],

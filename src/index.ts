@@ -5,35 +5,35 @@ import { Logger } from "@model/logger";
 export default Issue;
 export { Issue, VERSION as verison, Logger as logger };
 
-// const logger = new Logger("index");
+const logger = new Logger("index");
 
-// logger.log(VERSION);
+logger.log(VERSION);
 
-// const issue = new Issue("Test Issue");
-// issue.throw = false;
-// issue.use([3]);
-// issue.pipe((issue, a: number) => {
-//   return a * 15;
-// });
-// issue.try((issue, a) => {
-//   if (a > 10) {
-//     throw new Error("Issue Error");
-//   }
-//   return a;
-// });
+const issue = new Issue("Test Issue");
+issue.throw = false;
+issue.use([3]);
+issue.pipe((_issue, a: number) => {
+  return a * 15;
+});
+issue.try((_issue, a) => {
+  if (a > 10) {
+    throw new Error("Issue Error");
+  }
+  return a;
+});
 
-// issue.catch(function customCatch(error: any) {
-//   logger.log("custom catch", error.message);
-// });
+issue.catch(function customCatch(error: any) {
+  logger.log("custom catch", error.message);
+});
 
-// issue.finally(() => {
-//   logger.log("work");
-// });
+issue.finally(() => {
+  logger.warn("work");
+});
 
-// const result = Issue.solve(issue);
-// if (result.error) {
-//   logger.log("error 발생");
-// }
+const result = Issue.solve(issue);
+if (result.error) {
+  logger.log("error 발생");
+}
 
 // logger.log(result.result);
 

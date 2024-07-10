@@ -1,6 +1,11 @@
 import { LogLevel } from "@common/enum";
 import { format } from "@lib/format";
 import { Issue } from "./issue";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+import debug from "debug";
 
 export class Logger {
   #mode: Mode = Issue.mode;
@@ -47,7 +52,8 @@ export class Logger {
       Object.assign(this, {
         get [level.toLowerCase()]() {
           if (self.#mode === "development") {
-            return console.log.bind(
+            const logger = debug(level);
+            return logger.bind(
               self,
               `${LogLevel[level as keyof typeof LogLevel].Sign} [${
                 self.timestamp

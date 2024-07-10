@@ -12,6 +12,7 @@ import Issue from "../../dist/src/index";
 });
 
 function handleSubmit(e) {
+  logger("%s", "test");
   e.preventDefault();
 
   const frm = e.target;
@@ -28,6 +29,7 @@ function handleSubmit(e) {
   const validateIssue = Issue.task("validate username value");
   validateIssue.use([name, pwd, birth]);
   validateIssue.pipe((issue, [name, ...other]) => {
+    logger("%s", "test");
     Issue.logger.debug("1");
     if (/[0-9]+/g.test(name)) {
       return other;
